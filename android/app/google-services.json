@@ -1,0 +1,68 @@
+{
+  "project_info": {
+    "project_number": "329129281348",
+    "project_id": "slick-garden",
+    "storage_bucket": "slick-garden.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:329129281348:android:d6225e6eca7e32972e3911",
+        "android_client_info": {
+          "package_name": "com.example.garden"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "329129281348-749ageatos9mr18s21nah9l0s12km1qe.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC1cT8Kgppx6VD8u9aDD5ekMeNgynTTz7o"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "329129281348-749ageatos9mr18s21nah9l0s12km1qe.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:329129281348:android:ddb97cb6f37ea5ed2e3911",
+        "android_client_info": {
+          "package_name": "com.example.slick_garden"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "329129281348-749ageatos9mr18s21nah9l0s12km1qe.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC1cT8Kgppx6VD8u9aDD5ekMeNgynTTz7o"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "329129281348-749ageatos9mr18s21nah9l0s12km1qe.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
