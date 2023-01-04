@@ -5,6 +5,7 @@ import 'package:slick_garden/utilis/widgets/custom_button.dart';
 import 'package:slick_garden/utilis/widgets/custom_textfield.dart';
 import 'package:slick_garden/views/auth/sign_up.dart';
 import 'package:slick_garden/views/chat_screen.dart';
+import 'package:slick_garden/views/main_chat.dart';
 
 class LoginScreen extends StatefulWidget {
   static String routeName = '/login';
@@ -84,7 +85,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           _passwordController.text,
                           context);
                       // ignore: use_build_context_synchronously
-                      Navigator.pushNamed(context, ChatScreen.routeName);
+                      Navigator.pushNamed(context, MainQuestion.routeName);
                       if (res) {
                         setState(() {
                           isloading = false;

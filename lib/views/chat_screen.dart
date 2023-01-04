@@ -17,7 +17,11 @@ import 'package:swipe_to/swipe_to.dart';
 
 class ChatScreen extends StatefulWidget {
   static String routeName = '/chat';
-  const ChatScreen({super.key});
+  final String? id;
+  final String text;
+  final String date;
+  const ChatScreen(
+      {super.key, this.id, required this.text, required this.date});
 
   @override
   State<ChatScreen> createState() => _ChatScreenState();
@@ -28,11 +32,11 @@ class _ChatScreenState extends State<ChatScreen> {
   TextEditingController textEditingController = TextEditingController();
   final FireStoreMethods fireStoreMethods = FireStoreMethods();
 
-  final fireStoreData = FirebaseFirestore.instance
-      .collection('chat')
-      //.orderBy('timestamp', descending: true)
-      .snapshots();
-  bool isMe = false;
+  // final fireStoreData = FirebaseFirestore.instance
+  //     .collection('question').doc(widget.id!).collection('answers')
+  //     //.orderBy('timestamp', descending: true)
+  //     .snapshots();
+  int length = 0;
   final ScrollController _controller = ScrollController();
   final focusNode = FocusNode();
 
@@ -44,6 +48,18 @@ class _ChatScreenState extends State<ChatScreen> {
     super.dispose();
   }
 
+  data() async {
+    QuerySnapshot snapshot = await FirebaseFirestore.instance
+        .collection('question')
+        .doc(widget.id)
+        .collection('answers')
+        .get();
+
+    setState(() {
+      length = snapshot.docs.length;
+    });
+  }
+
   @override
   void initState() {
     if (_controller.hasClients) {
@@ -51,21 +67,23 @@ class _ChatScreenState extends State<ChatScreen> {
         _controller.position.maxScrollExtent + 200,
       );
     }
-    StreamBuilder(
-      stream: AuthMethods().authChanges,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(
-            child: CircularProgressIndicator(),
-          );
-        }
-        if (snapshot.hasData) {
-          AuthMethods().setToProvider(context);
-          return const ChatScreen();
-        }
-        return const ChatScreen();
-      },
-    );
+    data();
+
+    // StreamBuilder(
+    //   stream: AuthMethods().authChanges,
+    //   builder: (context, snapshot) {
+    //     if (snapshot.connectionState == ConnectionState.waiting) {
+    //       return const Center(
+    //         child: CircularProgressIndicator(),
+    //       );
+    //     }
+    //     if (snapshot.hasData) {
+    //       AuthMethods().setToProvider(context);
+    //       //return const ChatScreen();
+    //     }
+    //     //return const ChatScreen();
+    //   },
+    // );
     super.initState();
   }
 
@@ -117,9 +135,60 @@ class _ChatScreenState extends State<ChatScreen> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Container(
+                        padding: const EdgeInsets.all(9),
+                        //height: 70,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                          color: Colors.white,
+                        ),
+                        child: Column(
+                          children: [
+                            Text(
+                              widget.text,
+                              style: GoogleFonts.abel(
+                                  textStyle: const TextStyle(fontSize: 20)),
+                            ),
+                            const SizedBox(
+                              height: 10,
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Row(
+                                  children: [
+                                    Image.asset(
+                                      'assets/images/comment.png',
+                                      fit: BoxFit.cover,
+                                      height: 30,
+                                    ),
+                                    Text(length.toString())
+                                  ],
+                                ),
+                                Text(widget.date, style: GoogleFonts.abel())
+                              ],
+                            )
+                          ],
+                        ),
+                      ),
+                    ),
+                    Center(
+                        child: Text(
+                      'Answers',
+                      style: GoogleFonts.abel(
+                          textStyle: const TextStyle(
+                              fontSize: 30, fontWeight: FontWeight.bold)),
+                    )),
                     Expanded(
                       child: StreamBuilder<QuerySnapshot>(
-                          stream: fireStoreData,
+                          stream: FirebaseFirestore.instance
+                              .collection('question')
+                              .doc(widget.id!)
+                              .collection('answers')
+                              //.orderBy('timestamp', descending: true)
+                              .snapshots(),
                           builder: ((context,
                               AsyncSnapshot<QuerySnapshot> snapshot) {
                             if (!snapshot.hasData) {
@@ -138,7 +207,7 @@ class _ChatScreenState extends State<ChatScreen> {
                               return ListView.builder(
                                   controller: _controller,
                                   itemCount: snapshot.data!.docs.length,
-                                  reverse: false,
+                                  reverse: true,
                                   itemBuilder: ((context, index) {
                                     return SwipeTo(
                                       onRightSwipe: () {
@@ -207,7 +276,7 @@ class _ChatScreenState extends State<ChatScreen> {
                                                         Text(
                                                           snapshot.data!
                                                                   .docs[index]
-                                                              ['message'],
+                                                              ['answer'],
                                                           style: GoogleFonts
                                                               .abel(),
                                                         ),
@@ -250,7 +319,7 @@ class _ChatScreenState extends State<ChatScreen> {
                             child: MyFormFeild(
                                 focusNode: focusNode,
                                 controller: textEditingController,
-                                hintText: "Type......"),
+                                hintText: "Write your Answer"),
                           ),
                         ),
                         Padding(
@@ -269,8 +338,10 @@ class _ChatScreenState extends State<ChatScreen> {
 
                                         fireStoreMethods
                                             .chat(textEditingController.text,
-                                                context)
-                                            .then((value) {});
+                                                widget.id!, context)
+                                            .then((value) {
+                                          data();
+                                        });
                                         setState(() {
                                           textEditingController.text = '';
                                         });

@@ -121,33 +121,69 @@ class FireStoreMethods {
     return channelID;
   }
 
-  Future<void> chat(String text, BuildContext context) async {
+  Future<void> chat(String text, String id, BuildContext context) async {
     final user = Provider.of<UserProvide>(context, listen: false);
 
     try {
-      final String id = DateTime.now().millisecondsSinceEpoch.toString();
-      await _firestore.collection('chat').doc(id).set({
+      final String ansId = DateTime.now().millisecondsSinceEpoch.toString();
+      await _firestore
+          .collection('question')
+          .doc(id)
+          .collection('answers')
+          .doc(ansId)
+          .set({
         'username': user.user.username,
         'email': user.user.email,
-        'message': text,
+        'answer': text,
         'uid': user.user.uid,
         'createdAt': DateTime.now(),
-        'messageId': id,
+        'answerId': ansId,
       });
     } on FirebaseException catch (e) {
       Utilis.toatsMessage(e.message!);
     }
   }
 
-  // updateViewCount(String channelId, bool isIncreasing) async {
-  //   try {
-  //     await _firestore.collection('liveStreamData').doc(channelId).update({
-  //       'viewers': FieldValue.increment(isIncreasing ? 1 : -1)
-  //     }).onError((error, stackTrace) {
-  //       Message.toatsMessage(error.toString());
-  //     });
-  //   } catch (e) {
-  //     Message.toatsMessage(e.toString());
-  //   }
-  // }
+  Future<void> question(String text, BuildContext context) async {
+    final user = Provider.of<UserProvide>(context, listen: false);
+
+    try {
+      final String id = DateTime.now().millisecondsSinceEpoch.toString();
+      await _firestore.collection('question').doc(id).set({
+        'username': user.user.username,
+        'email': user.user.email,
+        'question': text,
+        'uid': user.user.uid + user.user.username,
+        'createdAt': DateTime.now(),
+        'messageId': id,
+        'likes': 0,
+        'isSelected': false,
+      });
+    } on FirebaseException catch (e) {
+      Utilis.toatsMessage(e.message!);
+    }
+  }
+
+  updateSelection(String id, bool selected) async {
+    try {
+      await _firestore
+          .collection('question')
+          .doc(id)
+          .update({'isSelected': selected});
+    } catch (e) {
+      Utilis.toatsMessage(e.toString());
+    }
+  }
+
+  updateViewCount(String channelId, bool isIncreasing) async {
+    try {
+      await _firestore.collection('question').doc(channelId).update({
+        'likes': FieldValue.increment(isIncreasing ? 1 : -1)
+      }).onError((error, stackTrace) {
+        Utilis.toatsMessage(error.toString());
+      });
+    } catch (e) {
+      Utilis.toatsMessage(e.toString());
+    }
+  }
 }

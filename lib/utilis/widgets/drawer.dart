@@ -3,6 +3,7 @@ import 'package:flutter_advanced_drawer/flutter_advanced_drawer.dart';
 import 'package:slick_garden/views/chat_screen.dart';
 import 'package:slick_garden/views/herbs_screen.dart';
 import 'package:slick_garden/views/home.dart';
+import 'package:slick_garden/views/main_chat.dart';
 import 'package:slick_garden/views/vegetables.dart';
 import 'package:slick_garden/views/vid_screen.dart';
 
@@ -107,7 +108,7 @@ class MyDrawer extends StatelessWidget {
                     Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: ((context) => const ChatScreen())));
+                            builder: ((context) => const MainQuestion())));
                   },
                   leading: Padding(
                     padding: const EdgeInsets.all(8.0),

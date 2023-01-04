@@ -6,11 +6,13 @@ import 'package:slick_garden/providers/herbs_provider.dart';
 import 'package:slick_garden/providers/user_provider.dart';
 import 'package:slick_garden/providers/veg_rovider.dart';
 import 'package:slick_garden/utilis/firebase.dart';
+import 'package:slick_garden/utilis/firestore.dart';
 import 'package:slick_garden/views/auth/login.dart';
 import 'package:slick_garden/views/auth/sign_up.dart';
 import 'package:slick_garden/views/chat_screen.dart';
 
 import 'package:slick_garden/views/home.dart';
+import 'package:slick_garden/views/main_chat.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -45,16 +47,17 @@ class MyApp extends StatelessWidget {
           }
           if (snapshot.hasData) {
             AuthMethods().setToProvider(context);
-            return ChatScreen();
+
+            return MainQuestion();
           }
-          return ChatScreen();
+          return MainQuestion();
         },
       ),
       routes: {
         MenuScreen.routeName: (context) => MenuScreen(),
         LoginScreen.routeName: (context) => const LoginScreen(),
         SignUpScreen.routeName: (context) => const SignUpScreen(),
-        ChatScreen.routeName: (context) => const ChatScreen()
+        MainQuestion.routeName: (context) => const MainQuestion()
       },
     );
   }
