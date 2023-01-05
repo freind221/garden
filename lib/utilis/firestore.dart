@@ -121,7 +121,8 @@ class FireStoreMethods {
     return channelID;
   }
 
-  Future<void> chat(String text, String id, BuildContext context) async {
+  Future<void> chat(double mid, double pos, String time, String name,
+      String reply, String text, String id, BuildContext context) async {
     final user = Provider.of<UserProvide>(context, listen: false);
 
     try {
@@ -135,9 +136,41 @@ class FireStoreMethods {
         'username': user.user.username,
         'email': user.user.email,
         'answer': text,
+        'reply': reply,
+        'mId': mid,
+        'pos': pos,
+        'answerTime': time,
+        'ansName': name,
         'uid': user.user.uid,
         'createdAt': DateTime.now(),
         'answerId': ansId,
+      });
+    } on FirebaseException catch (e) {
+      Utilis.toatsMessage(e.message!);
+    }
+  }
+
+  Future<void> replay(
+      String message, String text, String id, BuildContext context) async {
+    final user = Provider.of<UserProvide>(context, listen: false);
+
+    try {
+      //final String ansId = DateTime.now().millisecondsSinceEpoch.toString();
+      await _firestore
+          .collection('question')
+          .doc(id)
+          .collection('answers')
+          .doc(id)
+          .collection('reply')
+          .doc()
+          .set({
+        'username': user.user.username,
+        'email': user.user.email,
+        'message': message,
+        'reply': text,
+        'uid': user.user.uid,
+        'createdAt': DateTime.now(),
+        'replyId': id,
       });
     } on FirebaseException catch (e) {
       Utilis.toatsMessage(e.message!);
@@ -156,34 +189,50 @@ class FireStoreMethods {
         'uid': user.user.uid + user.user.username,
         'createdAt': DateTime.now(),
         'messageId': id,
-        'likes': 0,
-        'isSelected': false,
+        'likes': [],
+        'likedBy': user.user.uid
       });
     } on FirebaseException catch (e) {
       Utilis.toatsMessage(e.message!);
     }
   }
 
-  updateSelection(String id, bool selected) async {
-    try {
-      await _firestore
-          .collection('question')
-          .doc(id)
-          .update({'isSelected': selected});
-    } catch (e) {
-      Utilis.toatsMessage(e.toString());
+  likeVideo(String id, BuildContext context) async {
+    final user = Provider.of<UserProvide>(context, listen: false);
+    DocumentSnapshot doc =
+        await _firestore.collection('question').doc(id).get();
+    var uid = user.user.uid;
+    if ((doc.data()! as dynamic)['likes'].contains(uid)) {
+      await _firestore.collection('question').doc(id).update({
+        'likes': FieldValue.arrayRemove([uid]),
+      });
+    } else {
+      await _firestore.collection('question').doc(id).update({
+        'likes': FieldValue.arrayUnion([uid]),
+      });
     }
   }
 
-  updateViewCount(String channelId, bool isIncreasing) async {
-    try {
-      await _firestore.collection('question').doc(channelId).update({
-        'likes': FieldValue.increment(isIncreasing ? 1 : -1)
-      }).onError((error, stackTrace) {
-        Utilis.toatsMessage(error.toString());
-      });
-    } catch (e) {
-      Utilis.toatsMessage(e.toString());
-    }
-  }
+  // updateSelection(String id, bool selected) async {
+  //   try {
+  //     await _firestore
+  //         .collection('question')
+  //         .doc(id)
+  //         .update({'isSelected': selected});
+  //   } catch (e) {
+  //     Utilis.toatsMessage(e.toString());
+  //   }
+  // }
+
+  // updateViewCount(String channelId, bool isIncreasing) async {
+  //   try {
+  //     await _firestore.collection('question').doc(channelId).update({
+  //       'likes': FieldValue.increment(isIncreasing ? 1 : -1)
+  //     }).onError((error, stackTrace) {
+  //       Utilis.toatsMessage(error.toString());
+  //     });
+  //   } catch (e) {
+  //     Utilis.toatsMessage(e.toString());
+  //   }
+  // }
 }

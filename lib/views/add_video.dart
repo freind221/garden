@@ -54,9 +54,13 @@ class _AddVideosState extends State<AddVideos> {
                   });
                 },
                 child: isLoading
-                    ? const CircularProgressIndicator(
-                        color: Colors.white,
-                        strokeWidth: 3,
+                    ? Transform.scale(
+                        scale: 0.5,
+                        child: const CircularProgressIndicator(
+                          value: 4,
+                          color: Colors.white,
+                          strokeWidth: 3,
+                        ),
                       )
                     : const Text("Submit"))
           ],

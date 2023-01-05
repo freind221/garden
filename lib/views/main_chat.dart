@@ -7,6 +7,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter_advanced_drawer/flutter_advanced_drawer.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:slick_garden/models/user_model.dart';
 import 'package:slick_garden/providers/user_provider.dart';
 import 'package:slick_garden/utilis/firebase.dart';
 import 'package:slick_garden/utilis/firestore.dart';
@@ -96,6 +97,8 @@ class _MainQuestionState extends State<MainQuestion> {
                 child: InkWell(
                     onTap: () {
                       AuthMethods().logout(context);
+                      Provider.of<UserProvide>(context)
+                          .setUser(User(uid: '', username: '', email: ''));
                     },
                     child: const Icon(Icons.logout_outlined)),
               )
@@ -341,47 +344,58 @@ class _MainQuestionState extends State<MainQuestion> {
                                                     children: [
                                                       InkWell(
                                                         onTap: () {
-                                                          isSelected =
-                                                              !isSelected;
-                                                          fireStoreMethods
-                                                              .updateSelection(
-                                                                  snapshot.data!
-                                                                              .docs[
-                                                                          index]
-                                                                      [
-                                                                      'messageId'],
-                                                                  isSelected);
-                                                          print("================" +
-                                                              isSelected
-                                                                  .toString());
-                                                          print(snapshot.data!
-                                                                  .docs[index]
-                                                              ['isSelected']);
-                                                          fireStoreMethods.updateViewCount(
+                                                          fireStoreMethods.likeVideo(
                                                               snapshot.data!
                                                                           .docs[
                                                                       index]
                                                                   ['messageId'],
-                                                              snapshot.data!
-                                                                          .docs[
-                                                                      index][
-                                                                  'isSelected']);
-                                                          setState(() {
-                                                            {
-                                                              {
-                                                                isliked =
-                                                                    !isliked;
-                                                              }
-                                                            }
-                                                          });
+                                                              context);
+                                                          // isSelected =
+                                                          //     !isSelected;
+                                                          // fireStoreMethods
+                                                          //     .updateSelection(
+                                                          //         snapshot.data!
+                                                          //                     .docs[
+                                                          //                 index]
+                                                          //             [
+                                                          //             'messageId'],
+                                                          //         isSelected);
+                                                          // print("================" +
+                                                          //     isSelected
+                                                          //         .toString());
+                                                          // print(snapshot.data!
+                                                          //         .docs[index]
+                                                          //     ['isSelected']);
+                                                          // fireStoreMethods.updateViewCount(
+                                                          //     snapshot.data!
+                                                          //                 .docs[
+                                                          //             index]
+                                                          //         ['messageId'],
+                                                          //     snapshot.data!
+                                                          //                 .docs[
+                                                          //             index][
+                                                          //         'isSelected']);
+                                                          // setState(() {
+                                                          //   {
+                                                          //     {
+                                                          //       isliked =
+                                                          //           !isliked;
+                                                          //     }
+                                                          //   }
+                                                          // });
                                                         },
                                                         child: Row(
                                                           children: [
                                                             Image.asset(
-                                                              snapshot.data!.docs[
+                                                              snapshot
+                                                                      .data!
+                                                                      .docs[
                                                                           index]
-                                                                      [
-                                                                      'isSelected']
+                                                                          [
+                                                                          'likes']
+                                                                      .contains(
+                                                                          provider
+                                                                              .uid)
                                                                   ? 'assets/images/liked.png'
                                                                   : 'assets/images/like.png',
                                                               fit: BoxFit.cover,
@@ -397,6 +411,7 @@ class _MainQuestionState extends State<MainQuestion> {
                                                                     .docs[index]
                                                                         [
                                                                         'likes']
+                                                                    .length
                                                                     .toString(),
                                                                 style: GoogleFonts.abel(
                                                                     textStyle: const TextStyle(

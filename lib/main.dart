@@ -13,6 +13,7 @@ import 'package:slick_garden/views/chat_screen.dart';
 
 import 'package:slick_garden/views/home.dart';
 import 'package:slick_garden/views/main_chat.dart';
+import 'package:slick_garden/views/splash.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -48,9 +49,9 @@ class MyApp extends StatelessWidget {
           if (snapshot.hasData) {
             AuthMethods().setToProvider(context);
 
-            return MainQuestion();
+            return const SplashScreen();
           }
-          return MainQuestion();
+          return const SplashScreen();
         },
       ),
       routes: {

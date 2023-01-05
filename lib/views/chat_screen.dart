@@ -30,6 +30,7 @@ class ChatScreen extends StatefulWidget {
 class _ChatScreenState extends State<ChatScreen> {
   final _advancedDrawerController = AdvancedDrawerController();
   TextEditingController textEditingController = TextEditingController();
+  TextEditingController replyController = TextEditingController();
   final FireStoreMethods fireStoreMethods = FireStoreMethods();
 
   // final fireStoreData = FirebaseFirestore.instance
@@ -39,6 +40,15 @@ class _ChatScreenState extends State<ChatScreen> {
   int length = 0;
   final ScrollController _controller = ScrollController();
   final focusNode = FocusNode();
+  bool isSwiped = false;
+  int item = 1;
+  bool leftSelected = false;
+  bool rightSelected = false;
+  String message = '';
+  String name = '';
+  String time = '';
+  double pos = 0.0;
+  double mid = 0.0;
 
   @override
   void dispose() {
@@ -191,6 +201,12 @@ class _ChatScreenState extends State<ChatScreen> {
                               .snapshots(),
                           builder: ((context,
                               AsyncSnapshot<QuerySnapshot> snapshot) {
+                            // if (snapshot.connectionState ==
+                            //     ConnectionState.waiting) {
+                            //   return const Center(
+                            //     child: CircularProgressIndicator(),
+                            //   );
+                            // }
                             if (!snapshot.hasData) {
                               return const Center(
                                   child: Text("No Messages to Show"));
@@ -207,105 +223,269 @@ class _ChatScreenState extends State<ChatScreen> {
                               return ListView.builder(
                                   controller: _controller,
                                   itemCount: snapshot.data!.docs.length,
-                                  reverse: true,
+                                  reverse: false,
                                   itemBuilder: ((context, index) {
                                     return SwipeTo(
-                                      onRightSwipe: () {
-                                        focusNode.requestFocus();
-                                      },
-                                      child: Align(
-                                        alignment: provider.email ==
-                                                snapshot.data!.docs[index]
-                                                    ['email']
-                                            ? Alignment.centerRight
-                                            : Alignment.centerLeft,
-                                        child: Padding(
-                                          padding: const EdgeInsets.only(
-                                            top: 2.0,
-                                          ),
-                                          child: Padding(
-                                            padding: const EdgeInsets.only(
-                                                top: 3.0, left: 8, right: 8),
-                                            child: Container(
-                                              decoration: BoxDecoration(
-                                                  color: provider.email ==
-                                                          snapshot.data!
-                                                                  .docs[index]
-                                                              ['email']
-                                                      ? Colors.green[100]
-                                                      : Colors.white,
-                                                  borderRadius:
-                                                      const BorderRadius.only(
-                                                          topLeft: Radius
-                                                              .circular(10),
-                                                          bottomLeft: Radius
-                                                              .circular(10),
-                                                          bottomRight:
-                                                              Radius.circular(
-                                                                  10)),
-                                                  border: Border.all()),
-                                              //height: 30,
+                                        onRightSwipe: () {
+                                          print("========================" +
+                                              _controller.offset.toString());
+                                          setState(() {
+                                            isSwiped = true;
+                                            item = index;
+                                            pos = _controller.offset;
+                                            rightSelected = false;
+                                            leftSelected = true;
+                                            mid = snapshot.data!.docs[index]
+                                                ['pos'];
+                                            message = snapshot.data!.docs[index]
+                                                ['answer'];
+                                            name = snapshot.data!.docs[index]
+                                                ['username'];
+                                            time = DateTimeFormat.format(
+                                                    DateTime.fromMicrosecondsSinceEpoch(
+                                                        snapshot
+                                                            .data!
+                                                            .docs[index]
+                                                                ['createdAt']
+                                                            .microsecondsSinceEpoch),
+                                                    format: r'g:i a · M j, Y')
+                                                .substring(0, 8);
+                                          });
+
+                                          focusNode.requestFocus();
+                                        },
+                                        onLeftSwipe: () {
+                                          setState(() {
+                                            rightSelected = true;
+                                            leftSelected = false;
+                                          });
+                                        },
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            snapshot.data!.docs[index]
+                                                        ['reply'] !=
+                                                    ""
+                                                ? Padding(
+                                                    padding:
+                                                        const EdgeInsets.only(
+                                                            top: 8.0,
+                                                            left: 8,
+                                                            right: 8),
+                                                    child: InkWell(
+                                                      onTap: () {
+                                                        //snapshot.data!.docs
+                                                        _controller.animateTo(
+                                                            !rightSelected
+                                                                ? snapshot.data!
+                                                                            .docs[
+                                                                        index]
+                                                                    ['pos']
+                                                                : snapshot.data!
+                                                                            .docs[
+                                                                        index]
+                                                                    ['pos'],
+                                                            duration:
+                                                                const Duration(
+                                                                    seconds: 3),
+                                                            curve: Curves.ease);
+                                                      },
+                                                      child: Container(
+                                                        padding:
+                                                            const EdgeInsets
+                                                                .all(10),
+                                                        //height: 70,
+                                                        decoration: BoxDecoration(
+                                                            color: Colors.white,
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .circular(
+                                                                        10)),
+                                                        child: Column(
+                                                          crossAxisAlignment:
+                                                              CrossAxisAlignment
+                                                                  .end,
+                                                          children: [
+                                                            Column(
+                                                              crossAxisAlignment:
+                                                                  CrossAxisAlignment
+                                                                      .start,
+                                                              children: [
+                                                                Row(
+                                                                  children: [
+                                                                    Text(
+                                                                      "Replied to ",
+                                                                      style: GoogleFonts
+                                                                          .abel(),
+                                                                    ),
+                                                                    Text(
+                                                                      "@" +
+                                                                          snapshot
+                                                                              .data!
+                                                                              .docs[index]['ansName'],
+                                                                      style: GoogleFonts.abel(
+                                                                          textStyle:
+                                                                              TextStyle(color: Colors.blue)),
+                                                                    ),
+                                                                  ],
+                                                                ),
+                                                                Text(
+                                                                    snapshot.data!
+                                                                            .docs[index]
+                                                                        [
+                                                                        'answer'],
+                                                                    style: GoogleFonts
+                                                                        .abel()),
+                                                              ],
+                                                            ),
+                                                            Text(
+                                                                snapshot.data!
+                                                                            .docs[
+                                                                        index][
+                                                                    'answerTime'],
+                                                                style: GoogleFonts.abel(
+                                                                    textStyle: const TextStyle(
+                                                                        fontSize:
+                                                                            12)))
+                                                          ],
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  )
+                                                : AnimatedContainer(
+                                                    duration: const Duration(
+                                                        seconds: 1),
+                                                  ),
+                                            Align(
+                                              alignment: provider.email ==
+                                                      snapshot.data!.docs[index]
+                                                          ['email']
+                                                  ? Alignment.centerRight
+                                                  : Alignment.centerLeft,
                                               child: Padding(
                                                 padding: const EdgeInsets.only(
-                                                    top: 6.0,
-                                                    left: 6,
-                                                    right: 6,
-                                                    bottom: 6),
-                                                child: Column(
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.end,
-                                                  children: [
-                                                    Column(
-                                                      crossAxisAlignment:
-                                                          CrossAxisAlignment
-                                                              .start,
-                                                      children: [
-                                                        Text(
-                                                          snapshot.data!
-                                                                  .docs[index]
-                                                              ['username'],
-                                                          style: GoogleFonts.abel(
-                                                              textStyle:
-                                                                  const TextStyle(
-                                                                      color: Colors
-                                                                          .blue),
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold),
-                                                        ),
-                                                        Text(
-                                                          snapshot.data!
-                                                                  .docs[index]
-                                                              ['answer'],
-                                                          style: GoogleFonts
-                                                              .abel(),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                    Text(
-                                                        DateTimeFormat.format(
-                                                                DateTime.fromMicrosecondsSinceEpoch(snapshot
-                                                                    .data!
-                                                                    .docs[index]
+                                                  top: 2.0,
+                                                ),
+                                                child: Padding(
+                                                  padding:
+                                                      const EdgeInsets.only(
+                                                          top: 3.0,
+                                                          left: 8,
+                                                          right: 8),
+                                                  child: Container(
+                                                    decoration: BoxDecoration(
+                                                        color: provider.email ==
+                                                                snapshot.data!
+                                                                        .docs[index]
+                                                                    ['email']
+                                                            ? Colors.green[100]
+                                                            : Colors.white,
+                                                        borderRadius: const BorderRadius
+                                                                .only(
+                                                            topLeft: Radius
+                                                                .circular(10),
+                                                            bottomLeft:
+                                                                Radius.circular(
+                                                                    10),
+                                                            bottomRight:
+                                                                Radius.circular(
+                                                                    10)),
+                                                        border: Border.all()),
+                                                    //height: 30,
+                                                    child: Padding(
+                                                      padding:
+                                                          const EdgeInsets.only(
+                                                              top: 6.0,
+                                                              left: 6,
+                                                              right: 6,
+                                                              bottom: 6),
+                                                      child: Column(
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .end,
+                                                        children: [
+                                                          Column(
+                                                            crossAxisAlignment:
+                                                                CrossAxisAlignment
+                                                                    .start,
+                                                            children: [
+                                                              Text(
+                                                                snapshot.data!
+                                                                            .docs[
+                                                                        index][
+                                                                    'username'],
+                                                                style: GoogleFonts.abel(
+                                                                    textStyle: TextStyle(
+                                                                        color: _controller.offset != snapshot.data!.docs[index]['pos']
+                                                                            ? Colors
+                                                                                .blue
+                                                                            : Colors
+                                                                                .amber),
+                                                                    fontWeight:
+                                                                        FontWeight
+                                                                            .bold),
+                                                              ),
+
+                                                              Text(
+                                                                snapshot.data!.docs[index]
+                                                                            [
+                                                                            'reply'] ==
+                                                                        ""
+                                                                    ? snapshot
+                                                                            .data!
+                                                                            .docs[index]
                                                                         [
-                                                                        'createdAt']
-                                                                    .microsecondsSinceEpoch),
-                                                                format:
-                                                                    r'g:i a · M j, Y')
-                                                            .substring(0, 8),
-                                                        style: GoogleFonts.abel(
-                                                            textStyle:
-                                                                const TextStyle(
-                                                                    fontSize:
-                                                                        10)))
-                                                  ],
+                                                                        'answer']
+                                                                    : snapshot
+                                                                            .data!
+                                                                            .docs[index]
+                                                                        [
+                                                                        'reply'],
+                                                                style:
+                                                                    GoogleFonts
+                                                                        .abel(),
+                                                              ),
+                                                              // Row(
+                                                              //   children: [
+                                                              //     Padding(
+                                                              //       padding:
+                                                              //           const EdgeInsets
+                                                              //                   .only(
+                                                              //               top: 8.0),
+                                                              //       child: (Icon(Icons
+                                                              //           .comment_outlined)),
+                                                              //     ),
+                                                              //   ],
+                                                              // ),
+                                                            ],
+                                                          ),
+                                                          Text(
+                                                              DateTimeFormat.format(
+                                                                      DateTime.fromMicrosecondsSinceEpoch(snapshot
+                                                                          .data!
+                                                                          .docs[index]
+                                                                              [
+                                                                              'createdAt']
+                                                                          .microsecondsSinceEpoch),
+                                                                      format:
+                                                                          r'g:i a · M j, Y')
+                                                                  .substring(
+                                                                      0, 8),
+                                                              style: GoogleFonts.abel(
+                                                                  textStyle:
+                                                                      const TextStyle(
+                                                                          fontSize:
+                                                                              10)))
+                                                        ],
+                                                      ),
+                                                    ),
+                                                  ),
                                                 ),
                                               ),
                                             ),
-                                          ),
-                                        ),
-                                      ),
-                                    );
+                                          ],
+                                        ));
                                   }));
                             }
                             return Container();
@@ -316,10 +496,23 @@ class _ChatScreenState extends State<ChatScreen> {
                         Expanded(
                           child: Padding(
                             padding: const EdgeInsets.all(8.0),
-                            child: MyFormFeild(
-                                focusNode: focusNode,
-                                controller: textEditingController,
-                                hintText: "Write your Answer"),
+                            child:
+                                // ? _replyWidget()
+                                Column(
+                              children: [
+                                leftSelected
+                                    ? _replyWidget(message)
+                                    : AnimatedContainer(
+                                        duration: const Duration(seconds: 1),
+                                      ),
+                                MyFormFeild(
+                                    focusNode: focusNode,
+                                    controller: leftSelected
+                                        ? replyController
+                                        : textEditingController,
+                                    hintText: "Write your Answer"),
+                              ],
+                            ),
                           ),
                         ),
                         Padding(
@@ -335,15 +528,30 @@ class _ChatScreenState extends State<ChatScreen> {
                                       onTap: () {
                                         //_scrollDown();
                                         //scrollToBottom().then((value) {});
-
+                                        print("============]========" +
+                                            _controller.offset.toString());
                                         fireStoreMethods
-                                            .chat(textEditingController.text,
-                                                widget.id!, context)
+                                            .chat(
+                                                mid,
+                                                leftSelected
+                                                    ? mid
+                                                    : _controller.offset,
+                                                time,
+                                                name,
+                                                replyController.text,
+                                                leftSelected
+                                                    ? message
+                                                    : textEditingController
+                                                        .text,
+                                                widget.id!,
+                                                context)
                                             .then((value) {
                                           data();
                                         });
                                         setState(() {
                                           textEditingController.text = '';
+                                          replyController.text = '';
+                                          leftSelected = false;
                                         });
                                       },
                                       child: const Icon(Icons.send)))),
@@ -372,6 +580,65 @@ class _ChatScreenState extends State<ChatScreen> {
                   ],
                 )),
         ));
+  }
+
+  Widget _replyWidget(String text) {
+    return AnimatedContainer(
+      alignment: Alignment.centerLeft,
+      duration: const Duration(seconds: 1),
+      decoration: const BoxDecoration(
+        borderRadius: BorderRadius.all(Radius.circular(10.0)),
+        color: Colors.white,
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(5),
+        child: Stack(
+          children: [
+            Container(
+              alignment: Alignment.centerLeft,
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.grey.shade100,
+                border: const Border(
+                  left: BorderSide(color: Colors.purple, width: 3),
+                ),
+              ),
+              child: Column(
+                children: [
+                  const Text('Reply',
+                      style: TextStyle(
+                          color: Colors.purple,
+                          fontSize: 15,
+                          fontWeight: FontWeight.w500)),
+                  const SizedBox(height: 3),
+                  Text(text,
+                      style: const TextStyle(
+                        color: Colors.black54,
+                        fontSize: 12,
+                      )),
+                ],
+              ),
+            ),
+            Positioned(
+                right: 10,
+                top: 10,
+                child: GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      leftSelected = false;
+                      rightSelected = false;
+                    });
+                  },
+                  child: const Icon(
+                    Icons.clear,
+                    color: Colors.black87,
+                    size: 18,
+                  ),
+                )),
+          ],
+        ),
+      ),
+    );
   }
 
   void _handleMenuButtonPressed() {

@@ -54,8 +54,10 @@ class _VegetablePageState extends State<VegetablePage> {
                           ((context, AsyncSnapshot<QuerySnapshot> snapshot) {
                         if (snapshot.connectionState ==
                             ConnectionState.waiting) {
-                          return const Center(
-                            child: CircularProgressIndicator(),
+                          return Center(
+                            child: Transform.scale(
+                                scale: 0.5,
+                                child: const CircularProgressIndicator()),
                           );
                         }
                         return ListView.builder(
